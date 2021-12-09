@@ -25,21 +25,33 @@ function isSimilar(str1, str2) {
 	await ymApi.init({username: YMAuth.login, password: YMAuth.password});
 	const ymList = await ymApi.getPlaylist("3");
 	const vkList = await vkApi.call("audio.get", {owner_id: VKID, count: 200});
-
 	const list = ymList.tracks.reverse();
+	const inVKandYM = [];
 	// Check every track in ymList to find similar tracks in vkList and if not found - add it
 	for (let i = 0; i < list.length; i++) {
 		const title = list[i].track.title;
 		const artist = list[i].track.artists[0].name;
-		if (!vkList.items.find(item =>
-				(item.artist.toLowerCase().includes(artist.toLowerCase()) || isSimilar(item.artist, artist)) &&
-				(item.title.toLowerCase().includes(title.toLowerCase()) || isSimilar(item.title, title))
-			)) {
-			console.log(`"${artist} - ${title}" missing!`);
+		const vkElement = vkList.items.find(item =>
+			(item.artist.toLowerCase().includes(artist.toLowerCase()) || isSimilar(item.artist, artist)) &&
+			(item.title.toLowerCase().includes(title.toLowerCase()) || isSimilar(item.title, title))
+		);
+		if (!vkElement) {
+			console.log(`"${artist} - ${title}" missing in VK!`);
 			const vkSearch = await vkApi.call("audio.search", {q: artist + " - " + title, count: 200});
-			if (!vkSearch.items.length) {console.log(`Can't find track!`); continue;}
+			if (!vkSearch.items.length) {console.log(`Can't find track in VK!`); continue;}
 			await vkApi.call("audio.add", {owner_id: vkSearch.items[0].owner_id, audio_id: vkSearch.items[0].id});
-			console.log(`Track has been added!`);
-		} //else console.log(`"${artist} - ${title}" present!`);
+			console.log(`Track has been added to VK!`);
+			inVKandYM.push(vkSearch.items[0]);
+		} else {
+			inVKandYM.push(vkElement);
+		}
+	}
+	// Check every track in vkList and if it not in ymList - delete it
+	for (const vkElement of vkList.items) {
+		if (!inVKandYM.includes(vkElement)) {
+			console.log(`"${vkElement.artist} - ${vkElement.title}" missing in YM!`);
+			await vkApi.call("audio.delete", {owner_id: vkElement.owner_id, audio_id: vkElement.id});
+			console.log(`Track has been deleted from VK!`);
+		}
 	}
 })()
