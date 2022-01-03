@@ -14,11 +14,11 @@ function isSimilar(str1, str2) {
 	// Compare all words in str1Arr and str2Arr by levenshtein distance
 	for (let i = 0; i < str1Arr.length; i++) {
 		for (let j = 0; j < str2Arr.length; j++) {
-			if (isSimilarByLevenshtein(str1Arr[i], str2Arr[j]) > 0.5) return true;
+			if (isSimilarByLevenshtein(str1Arr[i], str2Arr[j]) < 0.5) return false;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 (async () => {
