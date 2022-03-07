@@ -49,7 +49,7 @@ function isSimilar(str1, str2) {
 			if (!vkSearch.items.length || !vkTrack) {console.log(`Can't find any track in VK!`); continue;}
 			await vkApi.call("audio.add", {owner_id: vkTrack.owner_id, audio_id: vkTrack.id});
 			console.log(`Track has been added to VK!`);
-			inVKandYM.push(vkTrack[0]);
+			inVKandYM.push(vkTrack);
 		} else {
 			inVKandYM.push(vkElement);
 		}
@@ -67,7 +67,7 @@ function isSimilar(str1, str2) {
 
 	//Reprder tracks in VK
 	console.log(`Reordering tracks in VK...`);
-	const vkOrder = Array.from(vkList.items).reverse();
+	const vkOrder = (await vkApi.call("audio.get", {owner_id: VKID, count: 200})).items.reverse();
 	for (let i = 0; i < inVKandYM.length; i++) {
 		if (i === 0) continue;
 		if (vkOrder[i].id === inVKandYM[i].id) continue;
