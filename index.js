@@ -35,42 +35,43 @@ function isSimilar(str1, str2) {
 		//const artist = list[i].track.artists.map(e => e.name).join(", ");
 		const artist = list[i].track.artists[0].name;
 		const version = list[i].track.version;
-		const vkElement = vkList.items.find(item =>
+		const vkTrack = vkList.items.find(item =>
 			(item.artist.toLowerCase().includes(artist.toLowerCase()) || isSimilar(item.artist, artist)) &&
 			(item.title.toLowerCase().includes(title.toLowerCase()) || isSimilar(item.title, title))
 		);
-		if (!vkElement) {
+		if (!vkTrack) {
 			console.log(`"${artist} - ${title} ${version ? "("+version+")": ""}" missing in VK!`);
 			const vkSearch = await vkApi.call("audio.search", {q: artist + " - " + title + (version ? "("+version+")": ""), count: 200});
-			const vkTrack = vkSearch.items.find(item =>
+			const foundTrack = vkSearch.items.find(item =>
 				(item.artist.toLowerCase().includes(artist.toLowerCase()) || isSimilar(item.artist, artist)) &&
 				(item.title.toLowerCase().includes(title.toLowerCase()) || isSimilar(item.title, title))
 			);
-			if (!vkSearch.items.length || !vkTrack) {console.log(`Can't find any track in VK!`); continue;}
-			await vkApi.call("audio.add", {owner_id: vkTrack.owner_id, audio_id: vkTrack.id});
+			if (!vkSearch.items.length || !foundTrack) {console.log(`Can't find any track in VK!`); continue;}
+			await vkApi.call("audio.add", {owner_id: foundTrack.owner_id, audio_id: foundTrack.id});
 			console.log(`Track has been added to VK!`);
-			inVKandYM.push(vkTrack);
+			const addedTrack = await vkApi.call("audio.get", {owner_id: VKID, count: 1})
+			inVKandYM.push(addedTrack.items[0]);
 		} else {
-			inVKandYM.push(vkElement);
+			inVKandYM.push(vkTrack);
 		}
 	}
 
 	// Check every track in vkList and if it not in ymList - delete it
 	console.log("Checking for extra tracks...");
-	for (const vkElement of vkList.items) {
-		if (!inVKandYM.includes(vkElement)) {
-			console.log(`"${vkElement.artist} - ${vkElement.title}" missing in YM!`);
-			await vkApi.call("audio.delete", {owner_id: vkElement.owner_id, audio_id: vkElement.id});
+	for (const vkTrack of vkList.items) {
+		if (!inVKandYM.includes(vkTrack)) {
+			console.log(`"${vkTrack.artist} - ${vkTrack.title}" missing in YM!`);
+			await vkApi.call("audio.delete", {owner_id: vkTrack.owner_id, audio_id: vkTrack.id});
 			console.log(`Track has been deleted from VK!`);
 		}
 	}
 
 	//Reprder tracks in VK
 	console.log(`Reordering tracks in VK...`);
-	const vkOrder = (await vkApi.call("audio.get", {owner_id: VKID, count: 200})).items.reverse();
+	const vkNewList = (await vkApi.call("audio.get", {owner_id: VKID, count: 200})).items.reverse();
 	for (let i = 0; i < inVKandYM.length; i++) {
 		if (i === 0) continue;
-		if (vkOrder[i].id === inVKandYM[i].id) continue;
+		if (vkNewList[i].id === inVKandYM[i].id) continue;
 		await vkApi.call("audio.reorder", {owner_id: inVKandYM[i].owner_id, audio_id: inVKandYM[i].id, before: inVKandYM[i-1].id});
 		console.log(`Moved ${inVKandYM[i].artist} - ${inVKandYM[i].title} to position ${i}`);
 	}
