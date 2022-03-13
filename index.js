@@ -1,9 +1,9 @@
 const {VK} = require("vk-io");
 const {YMApi} = require("ym-api");
 const {isSimilarByIncludingChunks, isSimilarByLevenshtein} = require("./algorithmic.js");
-const {VKtoken, VKID, YMAuth} = require("./config.json");
+const {VKtoken, YMAuth} = require("./config.json");
 
-const vkApi = new VK({token: VKtoken,}).api;
+const vkApi = new VK({token: VKtoken}).api;
 const ymApi = new YMApi();
 
 function isSimilar(str1, str2) {
@@ -22,9 +22,11 @@ function isSimilar(str1, str2) {
 }
 
 (async () => {
+	const client = await vkApi.account.getProfileInfo();
+
 	await ymApi.init({username: YMAuth.login, password: YMAuth.password});
 	const ymList = await ymApi.getPlaylist("3");
-	const vkList = await vkApi.call("audio.get", {owner_id: VKID, count: 200});
+	const vkList = await vkApi.call("audio.get", {owner_id: client.id, count: 200});
 	const list = ymList.tracks.reverse();
 	const inVKandYM = [];
 
@@ -49,7 +51,7 @@ function isSimilar(str1, str2) {
 			if (!vkSearch.items.length || !foundTrack) {console.log(`Can't find any track in VK!`); continue;}
 			await vkApi.call("audio.add", {owner_id: foundTrack.owner_id, audio_id: foundTrack.id});
 			console.log(`Track has been added to VK!`);
-			const addedTrack = await vkApi.call("audio.get", {owner_id: VKID, count: 1})
+			const addedTrack = await vkApi.call("audio.get", {owner_id: client.id, count: 1})
 			inVKandYM.push(addedTrack.items[0]);
 		} else {
 			inVKandYM.push(vkTrack);
@@ -68,7 +70,7 @@ function isSimilar(str1, str2) {
 
 	//Reprder tracks in VK
 	console.log(`Reordering tracks in VK...`);
-	const vkNewList = (await vkApi.call("audio.get", {owner_id: VKID, count: 200})).items.reverse();
+	const vkNewList = (await vkApi.call("audio.get", {owner_id: client.id, count: 200})).items.reverse();
 	for (let i = 0; i < inVKandYM.length; i++) {
 		if (i === 0) continue;
 		if (vkNewList[i].id === inVKandYM[i].id) continue;

@@ -4,7 +4,6 @@
 ```json
 {
 	"VKtoken": "VKTOKEN",
-	"VKID": "VKID",
 	"YMAuth": {
 		"login": "LOGIN",
 		"password": "PASSWORD"
