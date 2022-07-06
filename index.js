@@ -1,7 +1,7 @@
 const {VK} = require("vk-io");
 const {YMApi} = require("ym-api");
 const {isSimilarByIncludingChunks, isSimilarByLevenshtein} = require("./algorithmic.js");
-const {VKtoken, YMAuth} = require("./config.json");
+const {VKtoken, YMAuth, YMplayListId} = require("./config.json");
 
 const vkApi = new VK({token: VKtoken}).api;
 const ymApi = new YMApi();
@@ -24,8 +24,8 @@ function isSimilar(str1, str2) {
 (async () => {
 	const client = await vkApi.account.getProfileInfo();
 
-	await ymApi.init({username: YMAuth.login, password: YMAuth.password});
-	const ymList = await ymApi.getPlaylist("3");
+	await ymApi.init({uid: YMAuth.uid, access_token: YMAuth.access_token});
+	const ymList = await ymApi.getPlaylist(YMplayListId ? ""+YMplayListId : "3");
 	const vkList = await vkApi.call("audio.get", {owner_id: client.id, count: 200});
 	const list = ymList.tracks.reverse();
 	const inVKandYM = [];
