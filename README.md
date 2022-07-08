@@ -13,7 +13,7 @@
 }
 ```
 Get VK token at: https://vkhost.github.io/  
-Get YM token at: https://music-yandex-bot.ru/ (View network tab)
+Get YM token in **network tab in DevTools (F12)** at: https://music-yandex-bot.ru/
 
 2. Run following commands:
 ```sh
