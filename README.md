@@ -3,10 +3,11 @@
 1. You should create `config.json` file in the root like this:
 ```json
 {
-	"VKtoken": "Token from VK admin",
+	"VKtoken": "VK_ACCESS_TOKEN",
+	"VKUserAgent": "VKAndroidApp/7.33-13214",
 	"YMAuth": {
 		"uid": 123456789,
-		"access_token": "ACCESSTOKEN"
+		"access_token": "YM_ACCESS_TOKEN"
 	},
 	"YMplayListId": "3"
 }

@@ -1,9 +1,9 @@
 const {VK} = require("vk-io");
 const {YMApi} = require("ym-api");
 const {isSimilarByIncludingChunks, isSimilarByLevenshtein} = require("./algorithmic.js");
-const {VKtoken, YMAuth, YMplayListId} = require("./config.json");
+const {VKtoken, VKUserAgent, YMAuth, YMplayListId} = require("./config.json");
 
-const vkApi = new VK({token: VKtoken}).api;
+const vkApi = new VK({token: VKtoken, apiHeaders: { "User-Agent": VKUserAgent }}).api;
 const ymApi = new YMApi();
 
 function isSimilar(str1, str2) {
