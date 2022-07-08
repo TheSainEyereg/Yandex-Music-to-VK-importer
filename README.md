@@ -12,7 +12,7 @@
 	"YMplayListId": "3"
 }
 ```
-Get VK token at: https://vkhost.github.io/
+Get VK token at: https://vkhost.github.io/  
 Get YM token at: https://music-yandex-bot.ru/ (View network tab)
 
 2. Run following commands:
