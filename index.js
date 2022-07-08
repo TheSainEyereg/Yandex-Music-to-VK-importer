@@ -1,9 +1,11 @@
 const {VK} = require("vk-io");
 const {YMApi} = require("ym-api");
-const {isSimilarByIncludingChunks, isSimilarByLevenshtein} = require("./algorithmic.js");
+const VKAudio = require("./components/VKAudio.js");
+const {isSimilarByIncludingChunks, isSimilarByLevenshtein} = require("./components/algorithmic.js");
 const {VKtoken, VKUserAgent, YMAuth, YMplayListId} = require("./config.json");
 
 const vkApi = new VK({token: VKtoken, apiHeaders: { "User-Agent": VKUserAgent }}).api;
+const vkAudio = new VKAudio(vkApi);
 const ymApi = new YMApi();
 
 function isSimilar(str1, str2) {
@@ -26,7 +28,7 @@ function isSimilar(str1, str2) {
 
 	await ymApi.init({uid: YMAuth.uid, access_token: YMAuth.access_token});
 	const ymList = await ymApi.getPlaylist(YMplayListId ? ""+YMplayListId : "3");
-	const vkList = await vkApi.call("audio.get", {owner_id: client.id, count: 200});
+	const vkList = await vkAudio.getOldAudioList(client.id);
 	const list = ymList.tracks.reverse();
 	const inVKandYM = [];
 
@@ -37,7 +39,7 @@ function isSimilar(str1, str2) {
 		//const artist = list[i].track.artists.map(e => e.name).join(", ");
 		const artist = list[i].track.artists[0].name;
 		const version = list[i].track.version;
-		const vkTrack = vkList.items.find(item =>
+		const vkTrack = vkList.find(item =>
 			(item.artist.toLowerCase().includes(artist.toLowerCase()) || isSimilar(item.artist, artist)) &&
 			(item.title.toLowerCase().includes(title.toLowerCase()) || isSimilar(item.title, title))
 		);
@@ -60,7 +62,7 @@ function isSimilar(str1, str2) {
 
 	// Check every track in vkList and if it not in ymList - delete it
 	console.log("Checking for extra tracks...");
-	for (const vkTrack of vkList.items) {
+	for (const vkTrack of vkList) {
 		if (!inVKandYM.includes(vkTrack)) {
 			console.log(`"${vkTrack.artist} - ${vkTrack.title}" missing in YM!`);
 			await vkApi.call("audio.delete", {owner_id: vkTrack.owner_id, audio_id: vkTrack.id});
