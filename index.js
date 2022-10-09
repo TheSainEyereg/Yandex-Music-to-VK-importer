@@ -72,7 +72,7 @@ function isSimilar(str1, str2) {
 
 	//Reprder tracks in VK
 	console.log(`Reordering tracks in VK...`);
-	const vkNewList = (await vkApi.call("audio.get", {owner_id: client.id, count: 200})).items.reverse();
+	const vkNewList = (await vkAudio.getOldAudioList(client.id)).reverse();
 	for (let i = 0; i < inVKandYM.length; i++) {
 		if (i === 0) continue;
 		if (vkNewList[i].id === inVKandYM[i].id) continue;
