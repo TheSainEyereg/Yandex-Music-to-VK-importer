@@ -18,7 +18,7 @@ class VKAudio {
 	
 	async getOldAudioList(id, offset = 0) { //Requires VK UserAgent
 		const res = await this.api.call("audio.get", {owner_id: id, count: 200, offset});
-		return res.items.length + offset == res.count ? res.items : [...res.items, ...await this.getOldAudioList(id, offset+200)]
+		return res.items.length != 200 ? res.items : [...res.items, ...await this.getOldAudioList(id, offset+200)]
 	}
 }
 
